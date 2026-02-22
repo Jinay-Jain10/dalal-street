@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const stockRoutes = require('./routes/stocks');
 const newsRoutes = require('./routes/news');
 const portfolioRoutes = require('./routes/portfolio');
+const watchlistRoutes = require('./routes/watchlist');
 
 
 const app = express();
@@ -20,6 +21,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/stocks', stockRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/portfolio', portfolioRoutes);
+app.use('/api/watchlist', watchlistRoutes);
 
 
 app.get('/', (req, res) => {

@@ -19,7 +19,7 @@ const getQuote = async (req, res) => {
   try {
     const { symbol } = req.params;
     const data = await getStockQuote(symbol);
-    res.json({ data });
+      res.json({ data });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ message: 'Failed to fetch stock data' });
@@ -38,5 +38,6 @@ const getHistory = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch historical data' });
   }
 };
+
 
 module.exports = { search, getQuote, getHistory };
