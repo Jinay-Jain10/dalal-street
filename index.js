@@ -6,6 +6,10 @@ const sequelize = require('./config/database');
 require('./models/index');
 
 const authRoutes = require('./routes/auth');
+const stockRoutes = require('./routes/stocks');
+const newsRoutes = require('./routes/news');
+const portfolioRoutes = require('./routes/portfolio');
+
 
 const app = express();
 
@@ -13,6 +17,10 @@ app.use(cors({ origin: 'http://localhost:5173' }));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/stocks', stockRoutes);
+app.use('/api/news', newsRoutes);
+app.use('/api/portfolio', portfolioRoutes);
+
 
 app.get('/', (req, res) => {
   res.json({ message: 'Dalal Street API is running' });
