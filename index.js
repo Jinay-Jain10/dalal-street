@@ -10,6 +10,7 @@ const stockRoutes = require('./routes/stocks');
 const newsRoutes = require('./routes/news');
 const portfolioRoutes = require('./routes/portfolio');
 const watchlistRoutes = require('./routes/watchlist');
+const battleRoutes = require('./routes/battles');
 
 
 const app = express();
@@ -22,6 +23,7 @@ app.use('/api/stocks', stockRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/watchlist', watchlistRoutes);
+app.use('/api/battles', battleRoutes);
 
 
 app.get('/', (req, res) => {
