@@ -15,7 +15,12 @@ const battleRoutes = require('./routes/battles');
 
 const app = express();
 
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://dalal-street.vercel.app/',
+  ],
+}));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
