@@ -18,7 +18,7 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://dalal-street.vercel.app/',
+    'https://dalal-street.vercel.app',
   ],
 }));
 app.use(express.json());
