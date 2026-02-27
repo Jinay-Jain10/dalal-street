@@ -300,7 +300,7 @@ const buyStock = async (req, res) => {
     }
 
     await member.update({
-      battle_balance: parseFloat(member.battle_balance) - total_value,
+      battle_balance: parseFloat(member.battle_balance) ,
     });
 
     const transaction = await GroupTransaction.create({
