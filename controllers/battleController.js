@@ -299,7 +299,7 @@ const buyStock = async (req, res) => {
       return res.status(400).json({ message: 'Insufficient battle balance' });
     }
 
-    await member.update({
+    await member.update({ 
       battle_balance: parseFloat(member.battle_balance) ,
     });
 
