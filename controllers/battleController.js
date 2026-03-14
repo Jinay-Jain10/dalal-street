@@ -300,7 +300,7 @@ const buyStock = async (req, res) => {
     }
 
     await member.update({ 
-      battle_balance: parseFloat(member.battle_balance) ,
+      battle_balance: parseFloat(member.battle_balance)-total_value ,
     });
 
     const transaction = await GroupTransaction.create({
@@ -428,7 +428,25 @@ const getBattlePortfolio = async (req, res) => {
   }
 };
 
+const deleteBattle = async (req, res) => {
+  try {
+    const group = await Group.findByPk(req.params.id);
+    if (!group) return res.status(404).json({ message: 'Battle not found' });
+    if (group.created_by !== parseInt(req.user.id)) return res.status(403).json({ message: 'Only the creator can delete this battle' });
+    if (group.status !== 'waiting') return res.status(400).json({ message: 'Only waiting battles can be deleted' });
+
+    await GroupMember.destroy({ where: { group_id: group.id } });
+    await GroupTransaction.destroy({ where: { group_id: group.id } });
+    await group.destroy();
+
+    res.json({ message: 'Battle deleted' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Failed to delete battle' });
+  }
+};
+
 module.exports = {
   createBattle, joinBattle, getBattles, getBattle,
-  startBattle, getLeaderboard, buyStock, sellStock, getBattlePortfolio,
+  startBattle, getLeaderboard, buyStock, sellStock, getBattlePortfolio, deleteBattle,
 };
