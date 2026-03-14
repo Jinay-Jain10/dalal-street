@@ -16,7 +16,24 @@ const withRetry = async (fn, retries = 3, delay = 1000) => {
   }
 };
 
-// Strip .NS or .BO suffix — NSE India uses plain symbols like RELIANCE not RELIANCE.NS
+// In-memory cache
+const quoteCache = {};
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+const getCached = (symbol) => {
+  const entry = quoteCache[symbol];
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL) {
+    delete quoteCache[symbol];
+    return null;
+  }
+  return entry.data;
+};
+
+const setCache = (symbol, data) => {
+  quoteCache[symbol] = { data, timestamp: Date.now() };
+};
+
 const cleanSymbol = (symbol) => symbol.replace(/\.(NS|BO)$/i, '');
 
 const searchStocks = async (query) => {
@@ -26,6 +43,9 @@ const searchStocks = async (query) => {
 const getStockQuote = async (symbol) => {
   const clean = cleanSymbol(symbol);
 
+  const cached = getCached(clean);
+  if (cached) return cached;
+
   const data = await withRetry(() => nse.getEquityDetails(clean));
 
   const price = data.priceInfo;
@@ -34,15 +54,13 @@ const getStockQuote = async (symbol) => {
   const metadata = data.metadata || {};
   const info = data.info || {};
 
-  // Calculate market cap from issued shares × current price
   const marketCap = security.issuedSize && price.lastPrice
     ? security.issuedSize * price.lastPrice
     : null;
 
-  // Volume from marketDeptOrderBook when market is open, otherwise null
   const volume = data.marketDeptOrderBook?.tradeInfo?.totalTradedVolume || null;
 
-  return {
+  const result = {
     symbol: clean + '.NS',
     name: info.companyName || clean,
     price: price.lastPrice,
@@ -63,13 +81,16 @@ const getStockQuote = async (symbol) => {
     priceToBook: null,
     dividendYield: null,
     dividendRate: null,
-  vwap: price.vwap || null,
-  listingDate: metadata.listingDate || null,
-  basicIndustry: industry.basicIndustry || null,
-  sector: industry.sector || null,
-  industry: industry.industry || null,
-  website: null,
+    vwap: price.vwap || null,
+    listingDate: metadata.listingDate || null,
+    basicIndustry: industry.basicIndustry || null,
+    sector: industry.sector || null,
+    industry: industry.industry || null,
+    website: null,
   };
+
+  setCache(clean, result);
+  return result;
 };
 
 const getHistoricalData = async (symbol, range) => {
@@ -100,23 +121,18 @@ const getHistoricalData = async (symbol, range) => {
     })
   );
 
-  // Response is an array of chunks, each with a .data array — flatten them
   const allRecords = Array.isArray(data)
     ? data.flatMap((chunk) => chunk.data || [])
     : (data?.data || []);
 
-  // Sort by date ascending
   const sorted = allRecords.sort((a, b) => {
     return new Date(a.mtimestamp) - new Date(b.mtimestamp);
   });
 
-  // For longer ranges, reduce data points to avoid overcrowding the chart
   let result = sorted;
   if (range === '1Y' && sorted.length > 52) {
-    // Keep every ~5th record for 1Y
     result = sorted.filter((_, i) => i % 5 === 0);
   } else if (range === '5Y' && sorted.length > 60) {
-    // Keep every ~20th record for 5Y
     result = sorted.filter((_, i) => i % 20 === 0);
   }
 
