@@ -27,6 +27,7 @@ This transforms stock market simulation from a solo learning tool into a social,
 - Join multiple battles simultaneously
 - Auto-end when duration expires, leaderboard freezes at final prices
 - Creator controls- start battle, delete waiting battles
+- Battle Chat- Group chat inside every battle, available from the waiting room through to the end. Messages poll every 30 seconds. Chat is read-only once a battle ends.
 
 **Stock Market**
 - Live NSE stock quotes via `stock-nse-india` package

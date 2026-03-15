@@ -3,7 +3,7 @@ const router = express.Router();
 const authMiddleware = require('../middlewares/auth');
 const {
   createBattle, joinBattle, getBattles, getBattle,
-  startBattle, getLeaderboard, buyStock, sellStock, getBattlePortfolio,deleteBattle
+  startBattle, getLeaderboard, buyStock, sellStock, getBattlePortfolio,deleteBattle,getMessages, sendMessage,
 } = require('../controllers/battleController');
 
 router.use(authMiddleware);
@@ -18,5 +18,7 @@ router.post('/:id/buy', buyStock);
 router.post('/:id/sell', sellStock);
 router.get('/:id/portfolio', getBattlePortfolio);
 router.delete('/:id', deleteBattle);
+router.get('/:id/messages', getMessages);
+router.post('/:id/messages', sendMessage);
 
 module.exports = router;

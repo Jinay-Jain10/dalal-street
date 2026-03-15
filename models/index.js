@@ -4,3 +4,4 @@ require('./Watchlist');
 require('./Group');
 require('./GroupMember');
 require('./GroupTransaction');
+require('./BattleMessage')

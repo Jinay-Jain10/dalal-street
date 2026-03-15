@@ -4,6 +4,8 @@ const GroupMember = require('../models/GroupMember');
 const GroupTransaction = require('../models/GroupTransaction');
 const User = require('../models/User');
 const { getStockQuote } = require('../services/stockService');
+const BattleMessage = require('../models/BattleMessage');
+
 
 // Helper: generate unique invite code
 const generateCode = async () => {
@@ -446,7 +448,69 @@ const deleteBattle = async (req, res) => {
   }
 };
 
+// GET /api/battles/:id/messages
+const getMessages = async (req, res) => {
+  try {
+    const group = await Group.findByPk(req.params.id);
+    if (!group) return res.status(404).json({ message: 'Battle not found' });
+
+    const member = await GroupMember.findOne({
+      where: { group_id: group.id, user_id: req.user.id },
+    });
+    if (!member) return res.status(403).json({ message: 'You are not a member' });
+
+    const messages = await BattleMessage.findAll({
+      where: { group_id: group.id },
+      include: [{ model: User, attributes: ['id', 'name'] }],
+      order: [['createdAt', 'ASC']],
+      limit: 100,
+    });
+
+    res.json({ messages });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Failed to fetch messages' });
+  }
+};
+
+// POST /api/battles/:id/messages
+const sendMessage = async (req, res) => {
+  try {
+    const { message } = req.body;
+    if (!message || !message.trim()) {
+      return res.status(400).json({ message: 'Message cannot be empty' });
+    }
+    if (message.length > 500) {
+      return res.status(400).json({ message: 'Message too long (max 500 characters)' });
+    }
+
+    const group = await Group.findByPk(req.params.id);
+    if (!group) return res.status(404).json({ message: 'Battle not found' });
+
+    const member = await GroupMember.findOne({
+      where: { group_id: group.id, user_id: req.user.id },
+    });
+    if (!member) return res.status(403).json({ message: 'You are not a member' });
+
+    const newMessage = await BattleMessage.create({
+      group_id: group.id,
+      user_id: req.user.id,
+      message: message.trim(),
+    });
+
+    const withUser = await BattleMessage.findByPk(newMessage.id, {
+      include: [{ model: User, attributes: ['id', 'name'] }],
+    });
+
+    res.status(201).json({ message: withUser });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Failed to send message' });
+  }
+};
+
+
 module.exports = {
   createBattle, joinBattle, getBattles, getBattle,
-  startBattle, getLeaderboard, buyStock, sellStock, getBattlePortfolio, deleteBattle,
+  startBattle, getLeaderboard, buyStock, sellStock, getBattlePortfolio, deleteBattle,getMessages, sendMessage,
 };
