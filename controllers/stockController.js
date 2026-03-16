@@ -47,6 +47,7 @@ const getMarketOverview = async (req, res) => {
   try {
     // Return cached data if still fresh
     if (marketOverviewCache && Date.now() - marketOverviewCacheTime < MARKET_CACHE_TTL) {
+      res.set('Cache-Control', 'no-store');
       return res.json(marketOverviewCache);
     }
 
@@ -95,6 +96,7 @@ const getMarketOverview = async (req, res) => {
     marketOverviewCache = result;
     marketOverviewCacheTime = Date.now();
 
+    res.set('Cache-Control', 'no-store');
     res.json(result);
   } catch (err) {
     console.error(err.message);
