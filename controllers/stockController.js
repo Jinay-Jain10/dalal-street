@@ -89,7 +89,7 @@ const getMarketOverview = async (req, res) => {
       indices: [formatIndex(nifty50), formatIndex(niftyBank)],
       gainers,
       losers,
-      fetchedAt: new Date().toLocaleTimeString('en-IN'),
+      fetchedAt: new Date().toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata'}),
     };
 
     // Cache the result
